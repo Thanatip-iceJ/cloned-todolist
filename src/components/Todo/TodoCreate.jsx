@@ -53,7 +53,7 @@ CC5 - React State (1 ในฟังก์ชันของกลุ่ม Reac
   // Rerender 1 ครั้ง == Code ทั้งหมดใน FC จะถูกรันใหม่ 1 ครั้ง
 */
 
-function TodoCreate(props) {
+function TodoCreate() {
   const [isOpenForm, setIsOpenForm] = useState(false);
 
   const handleClick = function () {
@@ -63,7 +63,7 @@ function TodoCreate(props) {
   return (
     <>
       {isOpenForm ? (
-        <TodoForm textSubmit='Add Task' setIsOpenForm={setIsOpenForm} addTodo={props.addTodo} />
+        <TodoForm textSubmit='Add Task' setIsOpenForm={setIsOpenForm} />
       ) : (
         <div className={styles.todo__create} onClick={handleClick}>
           <div className={styles.todo__create__button}>

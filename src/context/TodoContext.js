@@ -1,27 +1,40 @@
 import { createContext } from 'react';
 import { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
+import axios from 'axios'
+
 const END_POINT = 'http://localhost:8080/api/todos';
+axios.defaults.baseURL = 'http://localhost:8080/api'
 
 // ชื่อ Context => ใช้ทั้ง Provider, Consumer
 const TodoContext = createContext();
 
 // SetUp Context ฝั่ง Provider
 function TodoContextProvider(props) {
-  const [allTodos, setAllTodos] = useState([]);
+  const [allTodos, setAllTodos] = useState([]);;
+  const [showTodos, setShowTodos] = useState([]);
+
+  //Search
+  const searchTodo = keyword => {
+    const newShowTodos = allTodos.filter(todoObj => todoObj.task.toLowerCase().includes(keyword.toLowerCase()))
+    setShowTodos(newShowTodos)
+  }
 
   // #2 : Read
   const fetchAllTodo = async () => {
     try {
-      let response = await fetch('http://localhost:8080/api/todos', { method: 'GET' });
-      let todoData = await response.json();
+      // let response = await fetch('http://localhost:8080/api/todos', { method: 'GET' });
+      // let todoData = await response.json();
 
-      const newTodoLists = todoData.todos.map((todo) => {
+      const response = await axios.get('/todos')
+      console.log(response)
+      const newTodoLists = response.data.todos.map((todo) => {
         const newTodo = { ...todo, due_date: todo.date };
         delete todo.date;
         return newTodo;
       });
       setAllTodos(newTodoLists);
+      setShowTodos(newTodoLists);
     } catch (error) {
       console.log(error);
     }
@@ -57,6 +70,7 @@ function TodoContextProvider(props) {
 
       // Update STATE
       setAllTodos((p) => [createdTodo, ...p]);
+      setShowTodos((p) => [createdTodo, ...p]);
     } catch (error) {
       console.log(error);
     }
@@ -80,13 +94,15 @@ function TodoContextProvider(props) {
           body: JSON.stringify(updatedTodo),
         };
 
-        const response = await fetch(`${END_POINT}/${todoId}`, options);
-        const data = await response.json();
+        // const response = await fetch(`${END_POINT}/${todoId}`, options);
+        // const data = await response.json();
+        const {data} = await axios.put(`/todos/${todoId}`, updatedTodo)
 
         // UpdateState
         const newTodoLists = [...allTodos];
         newTodoLists[foundedIndex] = { ...data.todo, due_date: data.todo.date };
         setAllTodos(newTodoLists);
+        setShowTodos(newTodoLists);
       }
     } catch (error) {
       console.log(error);
@@ -96,17 +112,18 @@ function TodoContextProvider(props) {
   // #4 : Delete
   const deleteTodo = async function (todoId) {
     try {
-      const options = { method: 'DELETE' };
-      let response = await fetch(`${END_POINT}/${todoId}`, options);
+      // let response = await fetch(`${END_POINT}/${todoId}`, options);
+      let response = await axios.delete(`todos/${todoId}`)
       if (response.status === 204) {
         setAllTodos((prev) => prev.filter((todo) => todo.id !== todoId));
+        setShowTodos((prev) => prev.filter((todo) => todo.id !== todoId));
       }
     } catch (error) {
       console.log(error);
     }
   };
 
-  const sharedObj = { value: 60, allTodos, addTodo, fetchAllTodo, editTodo, deleteTodo };
+  const sharedObj = { allTodos, addTodo, fetchAllTodo, editTodo, deleteTodo, searchTodo, showTodos };
 
   return <TodoContext.Provider value={sharedObj}>{props.children}</TodoContext.Provider>;
 }

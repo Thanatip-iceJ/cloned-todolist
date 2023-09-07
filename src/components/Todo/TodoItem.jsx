@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { FaTrashAlt, FaPen } from 'react-icons/fa';
 import { HiOutlineCheck } from 'react-icons/hi';
-
+import useTodo from '../../hooks/useTodo';
 import TodoForm from './TodoForm';
 import styles from './TodoItem.module.scss';
-import useTodo from '../../hooks/useTodo';
 
 // function TodoItem(props) {
 // Object Destructuring (Props)
